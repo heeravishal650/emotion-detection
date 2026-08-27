@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Emotion Detection</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>AI Emotion Detection</h1>
+    <p class="subtitle">Allow camera access and detect facial emotions in real time.</p>
+
+    <div class="camera-card">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="canvas" hidden></canvas>
+      <div id="status">Camera is off</div>
+    </div>
+
+    <div class="controls">
+      <button id="startBtn">Start Camera</button>
+      <button id="stopBtn" disabled>Stop Camera</button>
+    </div>
+
+    <div class="result-card">
+      <h2>Detected Emotion</h2>
+      <div id="emotion">Waiting...</div>
+    </div>
+
+    <p class="note">
+      Camera processing is performed by the Python backend. Your browser must be
+      using HTTPS (Netlify provides this automatically).
+    </p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
