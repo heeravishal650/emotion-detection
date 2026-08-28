@@ -32,26 +32,20 @@ def analyze():
         }), 400
 
     try:
-        # Read uploaded image
         image_file = request.files["image"]
         image = Image.open(image_file).convert("RGB")
 
-        # Convert image to NumPy array
         frame = np.array(image)
 
-        # Analyze emotion using DeepFace
         result = DeepFace.analyze(
             img_path=frame,
             actions=["emotion"],
-            detector_backend="retinaface",
             enforce_detection=False
         )
 
-        # DeepFace can return a list or dictionary
         if isinstance(result, list):
             result = result[0]
 
-        # Get detected emotion
         emotion = result.get(
             "dominant_emotion",
             "Unknown"
@@ -66,7 +60,6 @@ def analyze():
         })
 
     except Exception as e:
-
         print("ERROR:", str(e))
 
         return jsonify({
