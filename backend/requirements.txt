@@ -3,6 +3,7 @@ Flask-Cors
 DeepFace==0.0.100
 tensorflow==2.21.0
 tf-keras==2.21.0
+opencv-python-headless==4.10.0.84
 numpy
 Pillow
 gunicorn
