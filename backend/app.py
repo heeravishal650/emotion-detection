@@ -43,6 +43,7 @@ def analyze():
         result = DeepFace.analyze(
             img_path=frame,
             actions=["emotion"],
+            detector_backend="retinaface",
             enforce_detection=False
         )
 
@@ -50,7 +51,11 @@ def analyze():
         if isinstance(result, list):
             result = result[0]
 
-        emotion = result.get("dominant_emotion", "Unknown")
+        # Get detected emotion
+        emotion = result.get(
+            "dominant_emotion",
+            "Unknown"
+        )
 
         return jsonify({
             "emotions": [
@@ -61,6 +66,7 @@ def analyze():
         })
 
     except Exception as e:
+
         print("ERROR:", str(e))
 
         return jsonify({
