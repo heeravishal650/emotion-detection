@@ -1,6 +1,8 @@
 Flask
 Flask-Cors
-DeepFace
+DeepFace==0.0.100
+tensorflow==2.21.0
+tf-keras==2.21.0
 opencv-python-headless
 numpy
 gunicorn
