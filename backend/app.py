@@ -1,18 +1,14 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from deepface import DeepFace
-import cv2
 import numpy as np
+from PIL import Image
 
 app = Flask(__name__)
 CORS(app)
 
-face_cascade = cv2.CascadeClassifier(
-    cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-)
 
-
-@app.get("/")
+@app.route("/")
 def home():
     return jsonify({
         "status": "ok",
@@ -20,66 +16,60 @@ def home():
     })
 
 
-@app.get("/health")
+@app.route("/health")
 def health():
-    return jsonify({"status": "healthy"})
+    return jsonify({
+        "status": "healthy"
+    })
 
 
-@app.post("/analyze")
+@app.route("/analyze", methods=["POST"])
 def analyze():
+
     if "image" not in request.files:
-        return jsonify({"error": "No image was uploaded"}), 400
+        return jsonify({
+            "error": "No image was uploaded"
+        }), 400
 
     try:
-        image_bytes = request.files["image"].read()
-        np_array = np.frombuffer(image_bytes, np.uint8)
-        frame = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+        # Read uploaded image
+        image_file = request.files["image"]
+        image = Image.open(image_file).convert("RGB")
 
-        if frame is None:
-            return jsonify({"error": "Invalid image"}), 400
+        # Convert image to NumPy array
+        frame = np.array(image)
 
-        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-        faces = face_cascade.detectMultiScale(
-            gray_frame,
-            scaleFactor=1.2,
-            minNeighbors=6,
-            minSize=(30, 30)
+        # Analyze emotion using DeepFace
+        result = DeepFace.analyze(
+            img_path=frame,
+            actions=["emotion"],
+            enforce_detection=False
         )
 
-        emotions = []
+        # DeepFace can return a list or dictionary
+        if isinstance(result, list):
+            result = result[0]
 
-        for (x, y, w, h) in faces:
-            face_roi = frame[y:y + h, x:x + w]
+        emotion = result.get("dominant_emotion", "Unknown")
 
-            try:
-                result = DeepFace.analyze(
-                    face_roi,
-                    actions=["emotion"],
-                    enforce_detection=False
-                )
+        return jsonify({
+            "emotions": [
+                {
+                    "emotion": emotion
+                }
+            ]
+        })
 
-                if isinstance(result, list):
-                    emotion = result[0]["dominant_emotion"]
-                else:
-                    emotion = result["dominant_emotion"]
+    except Exception as e:
+        print("ERROR:", str(e))
 
-            except Exception:
-                emotion = "Unknown"
-
-            emotions.append({
-                "emotion": emotion,
-                "x": int(x),
-                "y": int(y),
-                "width": int(w),
-                "height": int(h)
-            })
-
-        return jsonify({"emotions": emotions})
-
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        return jsonify({
+            "error": str(e)
+        }), 500
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(
+        host="0.0.0.0",
+        port=5000
+    )
